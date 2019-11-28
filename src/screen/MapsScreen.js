@@ -20,11 +20,10 @@ import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps'
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
-const LATITUDE = 15.5788251;
-const LONGITUDE = 108.4689989;
+const LATITUDE = 10.852892;
+const LONGITUDE = 106.626182;
 const LATITUDE_DELTA = 0.01;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
-var _this, setIntervalemit, setEmitVehicleBroadcast;
 
 export default class MapsScreen extends React.Component {
     constructor(props) {
@@ -42,13 +41,13 @@ export default class MapsScreen extends React.Component {
             markers: [],
             busstation: [],
             region: {
-                latitude: 10.852892, // vi do
-                longitude: 106.626182,//kinh do
+                latitude: LATITUDE, // vi do
+                longitude: LONGITUDE,//kinh do
                 latitudeDelta: LATITUDE_DELTA,
                 longitudeDelta: LONGITUDE_DELTA
             },
         };
-        _this = this;
+        this.onMapPress = this.onMapPress.bind(this);
     }
 
     getLocation = async (getgps = null) => {
@@ -70,6 +69,17 @@ export default class MapsScreen extends React.Component {
         )
     }
 
+    onMapPress(e) {
+        this.setState({
+            markers: [
+                ...this.state.markers,
+                {
+                    coordinate: e.nativeEvent.coordinate,
+                    key: `foo${id++}`,
+                },
+            ],
+        });
+    }
     goBack() {
 
     }
@@ -96,16 +106,18 @@ export default class MapsScreen extends React.Component {
                         </View>
                     </View>
                     <MapView
-                        onPress={(event)=> {
-                            tram_id !== null && this.postApiBusstation(event.nativeEvent.coordinate);
-                        }}
                         style={styleMap}
                         initialRegion={this.state.region}
+                        onPress={this.onMapPress}
+                        provider={this.props.provider}
                     >
-                        <Marker
-                            coordinate={{ 'latitude': this.state.region.latitude, 'longitude': this.state.region.longitude }}
-                            title='My Location'
-                            draggable />
+                        {this.state.markers.map(marker => (
+                            <Marker
+                                title={marker.key}
+                                key={marker.key}
+                                coordinate={marker.coordinate}
+                            />
+                        ))}
                     </MapView>
                 </View>
             </View>
